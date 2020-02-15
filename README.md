@@ -12,15 +12,25 @@
 # Pythonライブラリ
 
 pip install django ==2.2.7
+
 pip install django - leaflet ==0.25.0
+
 pip install django - geojson ==2.12.0
+
 pip install django - sslserver ==0.21
+
 pip install django -cors - headers ==3.2.0
+
 pip install psycopg2 ==2.8.4
+
 conda install -c conda - forge gdal
+
 pip install jsonfield ==2.0.2
+
 pip install pyproj ==2.4.1
+
 pip install django - heroku ==0.3.1
+
 
 不明点などがあれば本githubのissuesに記載してご連絡ください。
 
