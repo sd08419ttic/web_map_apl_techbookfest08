@@ -31,6 +31,10 @@ pip install pyproj ==2.4.1
 
 pip install django - heroku ==0.3.1
 
+# 本書/コードに関する連絡先
 
 不明点などがあれば本githubのissuesに記載してご連絡ください。
+もしくは下記メールアドレスにご連絡いただいてもかまいません。
+i35447take@gmail.com
+
 
