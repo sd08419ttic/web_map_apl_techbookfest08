@@ -1,0 +1,20 @@
+<!--3章 データベースのセレクトボックスへの設定-->
+<!DOCTYPE html>
+<!--Djangoー-->
+{% load static %}
+<html>
+<head lang="ja">
+    <meta charset="UTF-8">
+    <title></title>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>models choice fieldによるセレクトボックス</h1>
+    <form action="{% url 'db_selectbox' %}" method="get">
+    {{ form.choicefield_form.station_label.label }}：
+    {{choicefield_form.station_label}}
+    <input type="submit" value="送信">
+    </form>
+
+</body>
+</html>

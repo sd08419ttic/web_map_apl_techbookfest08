@@ -1,0 +1,79 @@
+<!--4章 Leaflet ユーザー操作の取得-->
+<!DOCTYPE html>
+<html>
+<!--Djangoー-->
+{% load staticfiles %} 
+{% load leaflet_tags %}
+{% load static %}
+<head lang="ja">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="{% static 'css/chap_4_5_style.css' %}">
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <style>
+    .leaflet-container { height: 95%; width:100% ;overflow: hidden; }
+    </style>
+    <script src= "{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src= "{% static 'js/csrf_token_ajax.js' %}"></script>
+    <script type="text/javascript">
+    var map; /*地図*/
+    var LeafIcon = L.Icon.extend({
+      options: {
+          iconSize:     [30, 30], /*アイコンサイズ*/
+          iconAnchor:   [15, 30], /*アイコン位置(地図座標とのずれ)*/
+          popupAnchor:  [0, -46]  /*ポップアップ位置*/
+      }
+    });
+    var train_icon = new LeafIcon({iconUrl: "{% static 'images/train_icon.png' %}"})
+    /*地図の初期化時に実行される処理*/
+    window.addEventListener("map:init", function (event) {
+      map = event.detail.map; /*地図の初期化*/
+      var mpoint = [35.681236, 139.767125];	    //東京駅
+      var zoom_level = 14;	/*ズームレベル 15付近がよく使われる*/
+      var zoom_max = 18;	/*最大ズームレベル*/
+      var zoom_min = 10;	/*最小ズームレベル*/
+      map.setView(mpoint, zoom_level);  /*初期表示の中心・ズームレベルの設定*/
+      map.setMinZoom(zoom_min);	/*ズームレベル最小値の反映*/
+      map.setMaxZoom(zoom_max);	/*ズームレベル最大値の反映*/
+      //マップクリック時に実行される関数を登録
+      map.on('click', onMapClick);
+    });
+    /*地図がクリックされた場合に呼び出される処理*/
+    function onMapClick(e) {
+      var clicked_lat = e.latlng.lat;  //クリックされた座標の緯度取得
+      var clicked_lon = e.latlng.lng;  //クリックされた座標の経度取得
+      //経緯度表示
+      alert('クリックした緯度：経度'+clicked_lat+", " + clicked_lon);
+      var mk = L.marker(e.latlng,{icon:train_icon}).on('click', onMarkerClick).addTo(map);
+
+      //HTMLに値をセット
+      document.getElementById('lat_clicked').innerHTML = '緯度: ' + clicked_lat ;
+      document.getElementById('lon_clicked').innerHTML = '経度: ' + clicked_lon ;
+
+    }
+    /*クリックで追加されたマーカーが再度クリックされた場合に呼び出される処理*/
+    function onMarkerClick(e) {
+      //マーカーのclickイベント呼び出される
+      //クリックされたマーカーを地図のレイヤから削除する
+      map.removeLayer(e.target);
+    }
+    </script>
+</head>
+<body>
+<header>
+<h1>地図案内Webアプリ</h1>
+</header>
+<section>
+{% leaflet_map "main" %}
+</section>
+<aside>
+<p>ここにクリックした座標に関する情報を表示します</p>
+<div id="lat_clicked"></div>
+<div id="lon_clicked"></div>
+</aside>
+<footer>
+<p>&copy; 2020.bamboo</p>
+</footer>
+</body>
+</html>

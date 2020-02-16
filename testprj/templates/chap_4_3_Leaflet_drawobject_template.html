@@ -1,0 +1,62 @@
+<!--4章 Leaflet図形の描画-->
+<!DOCTYPE html>
+<!--Djangoー-->
+{% load staticfiles %} 
+{% load leaflet_tags %}
+{% load static %}
+<html>
+  <head>
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <style>
+    .leaflet-container { height: 800px; } /*Webページで表示される地図の大きさ*/
+
+    </style>
+    <script type="text/javascript">
+    var map; /*地図*/
+    var LeafIcon = L.Icon.extend({
+      options: {
+          iconSize:     [30, 30], /*アイコンサイズ*/
+          iconAnchor:   [15, 30], /*アイコン位置(地図座標とのずれ)*/
+          popupAnchor:  [0, -46]  /*ポップアップ位置*/
+      }
+    });
+    var train_icon = new LeafIcon({iconUrl: "{% static 'images/train_icon.png' %}"})
+    //カスタムアイコン設定
+
+    window.addEventListener("map:init", function (event) {
+      map = event.detail.map; /*地図の初期化*/
+      var mpoint = [35.681236, 139.767125];	    //東京駅
+      var mpoint_ote = [35.685251, 139.763098];	//大手町駅
+      var mpoint_yuraku = [35.675027, 139.762788] //有楽町
+      var mpoint_ginza1 = [35.674371, 139.766957];	//銀座1丁目
+
+      var zoom_level = 14;	/*ズームレベル 15付近がよく使われる*/
+      var zoom_max = 18;	/*最大ズームレベル*/
+      var zoom_min = 10;	/*最小ズームレベル*/
+      map.setView(mpoint, zoom_level);  /*初期表示の中心・ズームレベルの設定*/
+      map.setMinZoom(zoom_min);	/*ズームレベル最小値の反映*/
+      map.setMaxZoom(zoom_max);	/*ズームレベル最大値の反映*/
+
+      /*マーカーの表示*/
+      L.marker(mpoint_ote,{title:"大手町",icon:train_icon}).addTo(map);　/*マーカーの配置*/
+      /*ドラッグ可能なマーカーの配置*/
+      L.marker(mpoint,{title:"有楽町駅",draggable:true,icon:train_icon}).addTo(map);  
+      //円の表示 (半径/色/線の太さ/塗りつぶし有無/透明度を指定)
+      L.circleMarker(mpoint_yuraku, { radius: 20, color: "blue", weight: 2, fill: true, fillColor: "blue", opacity: 0.1 }).addTo(map);
+      //線の表示 (大手町-銀座駅を結ぶ)
+      var roadlatlons = [mpoint_ote,mpoint_ginza1];
+      //polylineオブジェクトを作成して地図に追加 (座標/色/線の太さを指定)
+      L.polyline(roadlatlons, { color: 'red', weight: 5 }).addTo(map);
+      //多面体の表示
+      //面の境界線を2次元配列に設定　(描画結果が順番に依存するので注意)
+     var arealatlons = [mpoint_ote,mpoint,mpoint_ginza1,mpoint_yuraku ];
+      //polygonオブジェクトを作成して地図に追加(色/線の太さ/塗りつぶし有無/透明度を指定)
+      L.polygon(arealatlons, { color: 'green', weight: 2, fill: true, fillColor: 'green', opacity: 0.5 }).addTo(map);
+    });
+    </script>
+  </head>
+  <body>
+    {% leaflet_map "main" %}
+  </body>
+</html>

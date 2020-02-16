@@ -1,0 +1,29 @@
+<!--4章 Leaflet地図の表示-->
+<!DOCTYPE html>
+<!--Djangoー-->
+{% load staticfiles %} 
+{% load leaflet_tags %}
+{% load static %}
+<html>
+  <head>
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <style>
+    .leaflet-container { height: 800px; }
+    </style>
+    <script type="text/javascript">
+    
+    var map;       //地図
+    window.addEventListener("map:init", function (event) {
+      map = event.detail.map;
+      var mpoint = [35.681236, 139.767125];	//東京駅
+      map.setView(mpoint, 15); // 初期表示の中心・ズーム位置の設定 (東京駅)
+      map.setMinZoom(10);
+      map.setMaxZoom(18);
+    });
+    </script>
+  </head>
+  <body>
+    {% leaflet_map "main" %}
+  </body>
+</html>

@@ -1,0 +1,24 @@
+<!--3章 データベースの更新-->
+<!DOCTYPE html>
+<!--Djangoー-->
+{% load static %}
+<html>
+<head lang="ja">
+    <meta charset="UTF-8">
+    <title></title>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>データベースの更新</h1>
+    <form action="{% url 'db_update' %}" method="post">
+    {% csrf_token %} <!--post通信を使うときに追加ー-->
+    <label>ID:<input type="number" size="20" name="Req_ID" min="0" max="99999999"></label><br>
+    <label>駅名:<input type="text" size="20" name="Req_Station_Name"></label><br>
+    <label>緯度:<input type="number" size="20" name="Req_Station_Lat" min="25.0" max="46.0"></label><br>
+    <label>経度:<input type="number" size="20" name="Req_Station_Lon" min="123.0" max="146.0"></label><br>
+    <input type="submit" value="送信">
+    </form>
+    <h1>結果の表示</h1>
+    <p>{{res_message}}</p>
+</body>
+</html>

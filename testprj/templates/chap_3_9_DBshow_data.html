@@ -1,0 +1,32 @@
+<!--3章 データベースの表示-->
+<!DOCTYPE html>
+<!--Djangoー-->
+{% load static %}
+<html>
+<head lang="ja">
+    <meta charset="UTF-8">
+    <title></title>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>modelsのデータ一覧</h1>
+    <hr />
+    <table>
+    <tr>
+    <th>id</th>
+    <th>name</th>
+    <th>latitude</th>
+    <th>longitude</th>
+    </tr>
+    {% for item in mdl_data_all %}
+    <tr>
+    <td>{{item.id}}</td>
+    <td>{{item.name}}</td>
+    <td>{{item.latitude}}</td>
+    <td>{{item.longitude}}</td>
+    </tr>
+    {% endfor %}
+    </table>
+    <hr />
+</body>
+</html>

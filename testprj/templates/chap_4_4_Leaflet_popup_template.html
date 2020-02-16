@@ -1,0 +1,52 @@
+<!--4章 Leafletポップアップの設定-->
+<!DOCTYPE html>
+<!--Djangoー-->
+{% load staticfiles %} 
+{% load leaflet_tags %}
+{% load static %}
+<html>
+  <head>
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <style>
+    .leaflet-container { height: 800px; } /*Webページで表示される地図の大きさ*/
+    </style>
+    <script type="text/javascript">
+    var map; /*地図*/
+    var LeafIcon = L.Icon.extend({
+      options: {
+          iconSize:     [30, 30], /*アイコンサイズ*/
+          iconAnchor:   [15, 30], /*アイコン位置(地図座標とのずれ)*/
+          popupAnchor:  [0, -46]  /*ポップアップ位置*/
+      }
+    });
+    var train_icon = new LeafIcon({iconUrl: "{% static 'images/train_icon.png' %}"})
+    //カスタムアイコン設定
+    window.addEventListener("map:init", function (event) {
+      map = event.detail.map; /*地図の初期化*/
+      var mpoint = [35.681236, 139.767125];	    //東京駅
+      var mpoint_ote = [35.685251, 139.763098];  //大手町駅
+      var zoom_level = 14;	/*ズームレベル 15付近がよく使われる*/
+      var zoom_max = 18;	/*最大ズームレベル*/
+      var zoom_min = 10;	/*最小ズームレベル*/
+      map.setView(mpoint, zoom_level);  /*初期表示の中心・ズームレベルの設定*/
+      map.setMinZoom(zoom_min);	/*ズームレベル最小値の反映*/
+      map.setMaxZoom(zoom_max);	/*ズームレベル最大値の反映*/
+
+      /*ポップアップの作成 (文字列の表示)*/
+      var popup1 = L.popup().setContent("ここは大手町駅です");
+
+      //画像付きポップアップ（HTMLを利用）
+      var html_tex = "ここは東京駅です<br><img src={% static 'images/tokyostation.jpg' %} width='500' height='375'>"
+      var popup2 = L.popup({ maxWidth: 550 }).setContent(html_tex);
+      
+      L.marker(mpoint_ote,{icon:train_icon}).bindPopup(popup1).bindTooltip("大手町駅").addTo(map);
+      L.marker(mpoint,{icon:train_icon}).bindPopup(popup2).bindTooltip("東京駅").addTo(map);
+      
+    });
+    </script>
+  </head>
+  <body>
+    {% leaflet_map "main" %}
+  </body>
+</html>

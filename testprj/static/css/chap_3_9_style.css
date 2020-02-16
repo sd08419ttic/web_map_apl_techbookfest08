@@ -1,0 +1,9 @@
+/*3章 データベースの表示*/
+@charset "utf-8";
+th {
+  border: solid 1px;   /* 枠線指定 */
+  color: #f00;       /* 文字色指定 */
+}
+td {
+  border: solid 1px;   /* 枠線指定 */
+}

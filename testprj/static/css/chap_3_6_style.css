@@ -1,0 +1,11 @@
+/*3章 CSSのID指定*/
+@charset "utf-8";
+p#paragraph1{
+  color: #b7a077;
+  font-size: 20px;
+}
+
+p#paragraph2{
+  color: #0000FF;
+  font-size: 10px;
+}

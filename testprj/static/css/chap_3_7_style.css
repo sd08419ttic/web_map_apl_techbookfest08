@@ -1,0 +1,28 @@
+/*3章 CSSを用いた領域の装飾*/
+@charset "utf-8";
+header {
+  width: 100%;
+  height: 50px;
+  background: orange;
+}
+section {
+  width: 80%;
+  height:75px;
+  color: white;
+  background: purple;
+  float:left; /*左側に表示*/
+}
+aside {
+  width: 20%;
+  height:75px;
+  background: yellow;
+  float:left;/*左側に表示*/
+}
+
+footer {
+  width: 100%;
+  height: 50px;
+  color:blue;
+  background:greenyellow;
+  clear: left;  /*floatingを解除する*/
+}

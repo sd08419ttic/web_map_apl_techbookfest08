@@ -1,0 +1,45 @@
+<!--4章 Leaflet テンプレートの設定-->
+<!DOCTYPE html>
+<html>
+<!--Djangoー-->
+{% load staticfiles %} 
+{% load leaflet_tags %}
+{% load static %}
+<head lang="ja">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="{% static 'css/chap_4_5_style.css' %}">
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <style>
+    .leaflet-container { height: 95%; width:100% ;overflow: hidden; }
+    </style>
+    <script src= "{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src= "{% static 'js/csrf_token_ajax.js' %}"></script>
+    <script type="text/javascript">
+    
+    var map;       //地図
+    window.addEventListener("map:init", function (event) {
+      map = event.detail.map;
+      var mpoint = [35.681236, 139.767125];	//東京駅
+      map.setView(mpoint, 15); // 初期表示の中心・ズーム位置の設定 (東京駅)
+      map.setMinZoom(10);
+      map.setMaxZoom(18);
+    });
+    </script>
+</head>
+<body>
+<header>
+<h1>地図案内Webアプリ</h1>
+</header>
+<section>
+{% leaflet_map "main" %}
+</section>
+<aside>
+<p>ここにクリックした座標に関する情報を表示します(仮)</p>
+</aside>
+<footer>
+<p>&copy; 2020.bamboo</p>
+</footer>
+</body>
+</html>

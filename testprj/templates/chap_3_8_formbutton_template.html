@@ -1,0 +1,49 @@
+<!--3章 ラジオボタン/チェックボックス/セレクトボックスの実装-->
+<!DOCTYPE html>
+<html>
+<head lang="ja">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <form action="{% url 'html_webform' %}" method="get">
+        <h1>ラジオボタン</h1>
+        <p>ラジオボタン①　初期状態で選択なし</p>
+        <input type="radio" name="q1" value="はい"> はい
+        <input type="radio" name="q1" value="いいえ"> いいえ
+        </p>
+        <p>ラジオボタン②　初期状態を『いいえ』に指定</p>
+        <input type="radio" name="q2" value="はい"> はい
+        <input type="radio" name="q2" value="いいえ" checked> いいえ
+        </p>
+    
+        <h1>チェックボックス</h1>
+        <p>チェックボックス①　複数選択可のチェックボックス</p>
+        <p>
+        <input type="checkbox" name="eki" value="渋谷駅" checked="checked">渋谷駅
+        <input type="checkbox" name="eki" value="新宿駅">新宿駅
+        <input type="checkbox" name="eki" value="上野駅">上野駅
+        </p>
+    
+        <h1>セレクトボックス</h1>
+        <p>セレクトボックス①　単一選択のチェックボックス</p>
+        <select name="rosen">
+        <option value="yokosuka">横須賀線</option>
+        <option value="keihintohoku">京浜東北線</option>
+        <option value="saikyo">埼京線</option>
+        <option value="yamanote">山手線</option>
+        </select>
+        <br>
+        <h1>テキストボックス</h1>
+        <label>名前:<input type="text" size="20" name="submitted_to_dj"></label>
+        <input type="submit" value="送信">
+    </form>
+
+    <h1>入力結果(送信ボタンで更新)</h1>
+    <p>ラジオボタン①：{{res_q1}}</p>
+    <p>ラジオボタン②：{{res_q2}}</p>
+    <p>チェックボックス①：{{res_eki}}</p>
+    <p>セレクトボックス①：{{res_rosen}}</p>
+    <p>テキストボックス：{{res_submitted_to_dj}}</p>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!--Djangoー-->
+{% load staticfiles %} 
+{% load leaflet_tags %}
+{% load static %}
+<html>
+  <head>
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <script src= "{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src= "{% static 'js/csrf_token_ajax.js' %}"></script>
+    <style>
+    .leaflet-container { height: 800px; }
+    </style>
+    <script type="text/javascript">
+    var map;       //地図
+    var dataurl = '{% url "station_info" %}';
+
+
+    var myStyle = {         //描画される線情報を設定
+        "color": "blue",    //線の色
+        "weight": 5,        //線の太さ
+        "opacity": 0.65     //透明度
+    };
+
+    window.addEventListener("map:init", function (event) {
+      map = event.detail.map;
+    // 地図情報を受信後に描画する処理
+    fetch(dataurl)
+        .then(function(resp) {
+        return resp.json();
+        })
+        .then(function(data) {
+        L.geoJson(data, {
+            style: myStyle
+            }).addTo(map);
+        });
+      var mpoint = [35.681236, 139.767125];	//東京駅
+      map.setView(mpoint, 15); // 初期表示の中心・ズーム位置の設定 (東京駅)
+      map.setMinZoom(10);
+      map.setMaxZoom(18);
+    });
+    </script>
+  </head>
+  <body>
+    {% leaflet_map "main" %}
+  </body>
+</html>

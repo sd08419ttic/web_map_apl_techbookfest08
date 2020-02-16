@@ -1,0 +1,23 @@
+<!--3章 CSSの設定(ID指定)-->
+<!DOCTYPE html>
+<html>
+<!--Djangoー-->
+{% load staticfiles %} 
+<head lang="ja">
+<meta charset="UTF-8">
+<title></title>
+<link rel="stylesheet" href="{% static 'css/chap_3_6_style.css' %}">
+</head>
+<body>
+<header>Header Title</header>
+<section>
+<h1>見出し1</h1>
+<p id="paragraph1">ここに段落1の内容を記載。</p>
+<h2>見出し2</h2>
+<p id="paragraph2">ここに段落2の内容を記載。段落の切り替え時に改行コードが挿入されます。任意の点で改行したい場合は&lt;br&gt;<br>コードを使います。</p>
+<h3>見出し3</h3>
+</section>
+<aside>Side Section</aside>
+<footer>Footer</footer>
+</body>
+</html>
