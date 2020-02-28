@@ -30,12 +30,15 @@ urlpatterns = [
     url(r'^template_4_5/$', views.leaflet_with_temp, name='template_4_5'),      #4章 Leaflet Templateとの組み合わせ
     url(r'^template_4_6/$', views.leaflet_click_eve, name='template_4_6'),      #4章 Leaflet ユーザー操作の取得
     url(r'^template_4_7/$', views.leaflet_with_dbselect, name='template_4_7'),  #4章 Leaflet セレクトボックスから選択した情報を地図に表示
-    url(r'^template_4_8/$', views.leaflet_update_DB, name='db_get_request'),    #4章 Leaflet 選択した座標の情報をデータベースに登録
+    url(r'^template_4_8/$', views.leaflet_update_DB, name='template_4_8'),      #4章 Leaflet 選択した座標の情報をデータベースに登録
     url(r'^db_get_request/$', views.db_get_request, name='db_get_request'),     #4章 Leaflet 選択した座標の情報をデータベースに登録　（AJAX用)
+    url(r'^template_5_1/$', views.show_gsi_mapdata, name='template_5_1'),       #5章 国土地理院地図情報の可視化
+    url(r'^template_5_2/$', views.tokyo_pub_api, name='template_5_2'),          #5章 東京公共交通APIを利用した時刻表の表示
+    url(r'^get_tokyo_api/$', views.get_tokyo_api, name='get_tokyo_api'),          #5章 東京公共交通APIを利用した時刻表の表示(AJAX用)
+
     #url(r'^submitted_to_dj/$', views.req_from_dj, name='req_from_dj'), #追加する(form説明用)
     #url(r'^template_for_dbtest/$', views.db_test, name='db_test'),     # 追加する
     # Geojson
-    url(r'^station_info.geojson$', GeoJSONLayerView.as_view(model=Station_Info_MODEL), name='station_info'), 
-    url(r'^template_for_LeafletDB/$', views.Leaflet_DB, name='Leaflet_DB'),  # 追加する
+    url(r'^station_info.geojson$', GeoJSONLayerView.as_view(model=Station_Info_MODEL), name='station_info'),    #5章 国土地理院地図情報の可視化(Geojson用)
 
 ]

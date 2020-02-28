@@ -1,9 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from testapp.models import Station_MODEL               #modelsに記述したクラス名に合わせる
-from testapp.forms import  Custom_form  #modelChoiceField
+from testapp.forms import  Custom_form                 #modelChoiceField
+from testapp.open_data_web_api import func_tokyo_public_trans_API #東京公共交通API
 import json
 import datetime
+import numpy as np
+import pandas as pd
+import re
+import pyproj   #座標変換用ライブラリ
 
 #2章 Hello World
 def hello(req):
@@ -149,17 +154,7 @@ def leaflet_update_DB(request):
   }
   return render(request, 'chap_4_8_Leaflet_updateDB.html', d)
 
-
-def Leaflet_DB(request):
-  choicefieldform = Custom_form()
-  if request.method == 'GET':
-    pass
-  d = {
-    'choicefield_form':choicefieldform
-  }
-  return render(request, 'template.html', d)
-
-
+#4章 Leaflet 選択した座標の情報をデータベースに登録（AJAX用)
 def db_get_request(request):
   if request.method == 'GET': #データ取得要求
     req_name = request.GET.get('clicked_station_name')
@@ -201,35 +196,124 @@ def db_get_request(request):
     response = ""
   return HttpResponse(response, content_type = 'application/json')
 
+#5章 国土地理院地図情報の可視化
+def show_gsi_mapdata(request):
+  return render(request, 'chap_5_1_show_geojson_template.html')
 
+#5章 東京公共交通API
+def tokyo_pub_api(request):
+  return render(request, 'chap_5_2_show_timetable_template.html')
 
-# 3章 ラジオボタン/チェックボックス/セレクトボックスの実装
-# def req_from_dj(request):
-#   d = {
-#     'res_submitted_to_dj': request.GET.get('submitted_to_dj'),
-#     'res_q1': request.GET.get('q1'),
-#     'res_q2': request.GET.get('q2'),
-#     'res_eki': request.GET.get('eki'),
-#     'res_rosen': request.GET.get('rosen'),
-#     'res_example': request.GET.get('example')
-#   }
-#   print("response") #デバッグ用
-#   print(d)
-#   return render(request, 'template.html', d)
+#5章 東京公共交通API(AJAX)
+def get_tokyo_api(request):
+  if request.method == 'GET': #データ取得要求
+    req_lat = request.GET.get('center_lat')
+    req_lng = request.GET.get('center_lng')
+    #東京公共交通APIからマップ中央から10km以内の座標を取得 (pandas)
+    res_df = func_tokyo_public_trans_API().search_GPS_near_train_station_info(req_lat,req_lng,10000)
 
-# 3章 データベースの表示
-# def db_test(request):
-#   #modelsの要素を取得
-#   #modelから特定の列の要素をリストにして取得
-#   mdl_data_all = Station_MODEL.objects.all()  #modelの全てのデータを取得 (データベースの登録順に表示)
-#   #mdl_data_all = Station_MODEL.objects.all().order_by('id') #ID順をキーに昇順に並べる場合(必要に応じて設定)
-#   name_list = list(Station_MODEL.objects.values_list('name', flat=True))  #python の1次元配列で特定の列を取得する
-#   choicefieldform = Custom_form()
-#   if request.method == 'GET':
-#     aaa = request.GET.get('station_label')
-#   d = {
-#     'res_models_name_list': name_list,
-#     'mdl_data_all':mdl_data_all,
-#     'choicefield_form':choicefieldform
-#   }
-#   return render(request, 'template.html', d)
+    #一つもヒットしなかった場合
+    if len(res_df.index) == 0:
+      response = json.dumps("")
+      return HttpResponse(response, content_type = 'application/json')
+    elif len(res_df.index) >= 5:
+      #5件以上のデータを取得できた場合
+      #要求座標から最短となる結果を取得
+      #距離情報を計算 
+      grs80 = pyproj.Geod(ellps='GRS80')  # GRS80楕円体
+      np_result_lat = np.array(res_df["geo:lat"])
+      np_result_lon = np.array(res_df["geo:long"])
+      np_origin_lat = np.full_like(np_result_lat, req_lat)
+      np_origin_lon = np.full_like(np_result_lat, req_lng)
+      azimuth, bkw_azimuth, distance = grs80.inv(np_origin_lon, np_origin_lat, np_result_lon, np_result_lat)  
+      #出発点からの角度(北から deg)、目標点の角度(北から deg)、直線距離(m)
+      res_df['distance'] = distance
+      sorted_df =  res_df.sort_values(by='distance', ascending=True)
+      res_df =sorted_df[:5]
+    else:
+      pass      
+
+    #要素を配列にまとめる
+    lat_array = res_df['geo:lat'].tolist()    #駅緯度
+    lon_array = res_df['geo:long'].tolist()   #駅経度
+    dist_array = res_df['distance'].tolist()  #地図中央座標からの距離
+    name_array = res_df['dc:title'].tolist()  #駅名
+    operator_code_array = res_df['odpt:operator'].tolist()  #事業者コード
+    railway_code_array = res_df['odpt:railway'].tolist()  #路線名
+    Timetable_array = res_df['odpt:stationTimetable'].tolist()  #路線名
+
+    #事業者名の取得
+    operator_list = func_tokyo_public_trans_API().get_Operator_information()
+    operator_name_array = []
+    for indx in range(len(res_df.index)):
+      operator_name = operator_list[operator_list["owl:sameAs"]==operator_code_array[indx]]  #駅名コードをリストから検索
+      operator_name = operator_name["dc:title"].values  #駅名の取得
+      operator_name_array.append(operator_name[0])
+
+    #路線名の取得
+    railway_name_array = []
+    for indx in range(len(res_df.index)):
+      railway_name =func_tokyo_public_trans_API().get_Train_Railway_information(railway_code = railway_code_array[indx])
+      railway_name_array.append(operator_name_array[indx]+" "+railway_name['dc:title'].values[0]) #事業者名と路線名を結合
+
+    #土日判定
+    weekday = datetime.date.today().weekday()
+    if weekday>=5:
+      holiday_flg = True
+    else:
+      holiday_flg = False
+
+    #現在時間の取得
+    current_time = int(datetime.datetime.now().strftime('%H%M'))
+    if current_time < 500:  #深夜5時以降は24時間換算
+      current_time +=2400
+
+    #タイムテーブルへのアクセス
+    departure_time_array = []
+    destination_array = []
+    for indx in range(len(res_df.index)):
+      departure_timeobj = []
+      destination_timeobj = []
+      for indx2 in range(len(Timetable_array[indx])):
+        Checkflag = False
+        timetable_code = Timetable_array[indx][indx2]
+        #アクセス日が平日の場合
+        if (holiday_flg == False) and (timetable_code.find("Weekday")>0):
+          Checkflag = True
+        elif (holiday_flg == True) and (timetable_code.find("Holiday")>0):
+          Checkflag = True
+        else:
+          continue
+        if Checkflag == True:
+          statimetable = func_tokyo_public_trans_API().get_Train_Railway_StationTimetable_information(timetable_code=timetable_code)
+          try:
+            for ikisakiindx in range(len(statimetable["odpt:stationTimetableObject"].values)):
+              for timetableindx in range(len(statimetable["odpt:stationTimetableObject"].values[ikisakiindx])):
+                  temptime = statimetable["odpt:stationTimetableObject"].values[ikisakiindx][timetableindx]["odpt:departureTime"]
+                  temptime = int(re.sub("\\D", "", temptime)) #数字のみを抽出
+                  if temptime < 500:  #深夜5時以降は24時間換算
+                    temptime_comp = temptime + 2400
+                  else:
+                    temptime_comp = temptime
+                  if current_time < temptime_comp:
+                    deststation_code =  statimetable["odpt:stationTimetableObject"].values[ikisakiindx][timetableindx]["odpt:destinationStation"][0]
+                    destination_name_name =func_tokyo_public_trans_API().get_Train_Railway_Station_information(station_code = deststation_code)
+                    departure_timeobj.append(temptime)
+                    destination_timeobj.append(destination_name_name['dc:title'].values[0])
+                    break
+          except Exception as e:
+            continue
+      departure_time_array.append(departure_timeobj)
+      destination_array.append(destination_timeobj)
+
+    response = {
+      'lat':lat_array,
+      'lon':lon_array,
+      'name':name_array,
+      'distance':dist_array,
+      'operator_name':railway_name_array,
+      'departure_time_array':departure_time_array,
+      'destination_array':destination_array,
+    }
+    response = json.dumps(response)
+  return HttpResponse(response, content_type = 'application/json')

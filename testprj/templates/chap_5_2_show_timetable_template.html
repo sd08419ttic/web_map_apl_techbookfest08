@@ -1,0 +1,153 @@
+<!--5章 東京公共交通APIを利用した時刻表の表示-->
+<!DOCTYPE html>
+<html>
+<!--Djangoー-->
+{% load staticfiles %} 
+{% load leaflet_tags %}
+{% load static %}
+<head lang="ja">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="{% static 'css/chap_5_2_style.css' %}">
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <style>
+    .leaflet-container { height: 100%; width:100% ;overflow: hidden; }
+    </style>
+    <script src= "{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <!--CSRF対策用JavaScriptー-->
+    <script src= "{% static 'js/csrf_token_ajax.js' %}"></script>
+    <script type="text/javascript">
+    var map; /*地図*/
+    var LeafIcon = L.Icon.extend({
+      options: {
+          iconSize:     [30, 30], /*アイコンサイズ*/
+          iconAnchor:   [15, 30], /*アイコン位置(地図座標とのずれ)*/
+          popupAnchor:  [0, -46]  /*ポップアップ位置*/
+      }
+    });
+    var train_icon = new LeafIcon({iconUrl: "{% static 'images/train_icon.png' %}"})
+    var center_icon = new LeafIcon({iconUrl: "{% static 'images/marker-icon.png' %}"})
+
+
+    var last_clicked_lat; /*最後にクリックした緯度*/
+    var last_clicked_lon; /*最後にクリックした緯度*/
+    var center_marker;    /*画面中央のマーカー*/
+    var cent1;            /*画面中央のマーカー座標*/
+      /*地図の初期化時に実行される処理*/
+      window.addEventListener("map:init", function (event) {
+        map = event.detail.map; /*地図の初期化*/
+        var mpoint = [35.681236, 139.767125];	    //東京駅
+        var zoom_level = 14;	/*ズームレベル 15付近がよく使われる*/
+        var zoom_max = 18;	/*最大ズームレベル*/
+        var zoom_min = 10;	/*最小ズームレベル*/
+        map.setView(mpoint, zoom_level);  /*初期表示の中心・ズームレベルの設定*/
+        map.setMinZoom(zoom_min);	/*ズームレベル最小値の反映*/
+        map.setMaxZoom(zoom_max);	/*ズームレベル最大値の反映*/
+        //マップクリック時に実行される関数を登録
+        map.on('moveend',onMoveEnd);
+        var zoomed_center = map.getCenter();
+        cent1 = [zoomed_center.lat, zoomed_center.lng];
+        center_marker = L.marker(cent1,{icon:center_icon}).addTo(map);
+      });
+      /*ユーザーがマウスを動かし終えたときの処理*/
+      function onMoveEnd(e) {
+        var zoomed_center = map.getCenter();
+        /*マップ中央にマーカーを描画*/
+        map.removeLayer(center_marker);
+        var cent1 = [zoomed_center.lat, zoomed_center.lng];
+        center_marker = L.marker(cent1,{icon:center_icon}).addTo(map);
+
+        /*Djangoにマップ中央位置を渡し、付近の駅の緯度経度と時刻表情報をリクエスト*/
+        $.ajax('/testapp/get_tokyo_api/', {
+          type: 'GET',
+          dataType: 'json',
+          accepts: { text: "text/plain", json: "application/json" },
+          data: {
+            center_lat: zoomed_center.lat, /*マップ中央座標の緯度取得*/
+            center_lng: zoomed_center.lng, /*マップ中央座標の経度取得*/
+          },
+        })
+        .then(
+          function done(data) { //受信成功
+            //var lat_data_array = data['lat'];
+            $.each(data['lat'], function(index, value) {
+              //Leafletにマーカーをセット
+              var pt1 = [data['lat'][index], data["lon"][index]];
+              var stname = data['name'][index];
+              var opename = data['operator_name'][index];
+              var stdist = data['distance'][index].toFixed(1);
+
+              var popup1 = L.popup().setContent(stname);
+              var maker_1 = L.marker(pt1,{title:stname,icon:train_icon}).bindPopup(popup1).bindTooltip(stname).addTo(map);
+              var dest_name = data['destination_array'];
+              var dest_time = data['departure_time_array'];
+              //ポップアップ用文字列の作成
+              var rows=[];
+              var table = document.getElementById("St_table"+index);
+              while( table.rows[ 0 ] ) table.deleteRow( 0 );  //行をすべて削除
+              // 表に2次元配列の要素を格納
+              for(j = 0; j < dest_name[index].length; j++){
+                  rows.push(table.insertRow(-1));  // 行の追加
+                  var cell=rows[j].insertCell(-1);
+                  cell.appendChild(document.createTextNode(dest_name[index][j]));
+                  var cell=rows[j].insertCell(-1);
+                  cell.appendChild(document.createTextNode(dest_time[index][j]));
+              }
+              
+              // //HTMLに値をセット
+              document.getElementById('St_name'+index).innerHTML = '駅名: ' + stname;
+              document.getElementById('St_ope'+index).innerHTML = '路線: ' + opename;
+              document.getElementById('St_dist'+index).innerHTML = '直線距離: ' + stdist + '[m]';
+              })
+          },
+          function fail(data, status) {//受信失敗
+            alert('Request failed'+data+status);  (デバッグ用)
+          }
+        );
+      }
+
+    </script>
+</head>
+<body>
+<header>
+<h1>地図案内Webアプリ</h1>
+</header>
+<section>
+{% leaflet_map "main" %}
+</section>
+<aside>
+<br>
+<h1>地図の中心から近い駅上位5件</h1>
+<h2 id="St_name0"></h2>
+<div id="St_ope0"></div>
+<div id="St_dist0"></div>
+<table id="St_table0"></table>
+<br>
+<h2 id="St_name1"></h2>
+<div id="St_ope1"></div>
+<div id="St_dist1"></div>
+<table id="St_table1"></table>
+<br>
+<h2 id="St_name2"></h2>
+<div id="St_ope2"></div>
+<div id="St_dist2"></div>
+<table id="St_table2"></table>
+<br>
+<h2 id="St_name3"></h2>
+<div id="St_ope3"></div>
+<div id="St_dist3"></div>
+<table id="St_table3"></table>
+<br>
+<h2 id="St_name4"></h2>
+<div id="St_ope4"></div>
+<div id="St_dist4"></div>
+<table id="St_table4"></table>
+<br>
+
+</aside>
+<footer>
+<p>&copy; 2020.bamboo</p>
+</footer>
+</body>
+</html>

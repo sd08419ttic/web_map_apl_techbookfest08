@@ -31,6 +31,9 @@ pip install pyproj ==2.4.1
 
 pip install django - heroku ==0.3.1
 
+東京公共交通APIに関するAPIはtokenが必要となるので動作させるためには下記ページで取得後に
+open_data_web_apiのself.consumerKeyを書き換えてください。
+
 # 本書/コードに関する連絡先
 
 不明点などがあれば本githubのissuesに記載してご連絡ください。

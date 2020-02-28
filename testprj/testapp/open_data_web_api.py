@@ -30,7 +30,7 @@ class func_tokyo_public_trans_API():
                           503:"サービス利用不可"}
 
         #DEBUGフラグ (csvに保存)
-        self.DEB_FLAG = True
+        self.DEB_FLAG = False
 
     #カレンダーの情報取得
     #2.2.1. GET /api/v4/odpt:Calendar
@@ -44,7 +44,6 @@ class func_tokyo_public_trans_API():
         URL_REQ = self.URL_common + RDF_TYPE
         params = {'acl:consumerKey': self.consumerKey}
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("get_Calendar_information.csv",encoding='utf_8_sig') #for debug
 
@@ -61,7 +60,6 @@ class func_tokyo_public_trans_API():
         URL_REQ = self.URL_common + RDF_TYPE
         params = {'acl:consumerKey': self.consumerKey}
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         if self.DEB_FLAG == True:
             df_s.to_csv("get_Operator_information.csv",encoding='utf_8_sig') #for debug
@@ -97,7 +95,6 @@ class func_tokyo_public_trans_API():
             params.update({'odpt:railway':railway})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         if self.DEB_FLAG == True:
             df_s.to_csv("get_Train_Passenger_information.csv",encoding='utf_8_sig') #for debug
@@ -116,7 +113,6 @@ class func_tokyo_public_trans_API():
         params = {'acl:consumerKey': self.consumerKey}
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         if self.DEB_FLAG == True:
             df_s.to_csv("get_Train_RailDirection_information.csv",encoding='utf_8_sig') #for debug
@@ -153,7 +149,6 @@ class func_tokyo_public_trans_API():
             params.update({'odpt:lineCode':railway_LINECODE})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         if self.DEB_FLAG == True:
             df_s.to_csv("get_Train_Railway_information.csv",encoding='utf_8_sig') #for debug
@@ -189,7 +184,6 @@ class func_tokyo_public_trans_API():
             params.update({'odpt:toStation':to_sation_code})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -231,7 +225,6 @@ class func_tokyo_public_trans_API():
 
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -251,12 +244,15 @@ class func_tokyo_public_trans_API():
     #odpt:odpt:calendar(カレンダー　平日/休日などodpt.Calendar:Weekday)
     #dc:date :(日付　"2017-01-13T15:10:00+09:00")
 
-    def get_Train_Railway_StationTimetable_information(self,timetable_code="",station_code="",station_name="",operator_code="",railway_code="",station_numcode=""):
+    def get_Train_Railway_StationTimetable_information(self,timetable_code="",station_code="",station_name="",operator_code="",railway_code="",station_numcode="",dcdate=""):
         RDF_TYPE = "odpt:StationTimetable"
         URL_REQ = self.URL_common + RDF_TYPE
         params = {'acl:consumerKey': self.consumerKey}
 
         #検索条件が追加されている場合
+        if timetable_code != "":  #Timetable識別子
+            params.update({'owl:sameAs':timetable_code})
+
         if station_code != "":  #駅名識別子
             params.update({'odpt:station':station_code})
 
@@ -272,9 +268,10 @@ class func_tokyo_public_trans_API():
         if station_numcode != "":  #計算終了駅固有識別子、路線シンボル表記（e.g. 小田原線 => OH、丸ノ内線 => M）
             params.update({'odpt:stationCode':station_numcode})
 
+        if dcdate != "":  #ISO日付
+            params.update({'dc:date':dcdate})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -305,7 +302,6 @@ class func_tokyo_public_trans_API():
             params.update({'odpt:railway':railway_code})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -336,7 +332,6 @@ class func_tokyo_public_trans_API():
             params.update({'odpt:railway':railway_code})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -380,7 +375,6 @@ class func_tokyo_public_trans_API():
             params.update({'odpt:calendar':calender})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -408,7 +402,6 @@ class func_tokyo_public_trans_API():
             params.update({'odpt:operator':operator_code})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -451,7 +444,6 @@ class func_tokyo_public_trans_API():
             params.update({'odpt:toBusstopPole':toBusstopPole_code})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -490,7 +482,6 @@ class func_tokyo_public_trans_API():
             params.update({'odpt:calendar':calender_code})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -523,7 +514,6 @@ class func_tokyo_public_trans_API():
             params.update({'odpt:operator':operator_code})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -563,7 +553,6 @@ class func_tokyo_public_trans_API():
 
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -600,7 +589,6 @@ class func_tokyo_public_trans_API():
 
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -647,7 +635,6 @@ class func_tokyo_public_trans_API():
             params.update({'dc:date':date_num})
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         if self.DEB_FLAG == True:
@@ -690,16 +677,12 @@ class func_tokyo_public_trans_API():
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Common_information_Calender.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
-
 
         RDF_TYPE = "odpt:Operator"  #事業者情報
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Common_information_Operator.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
-
         return
 
     def dump_Train_information(self):
@@ -711,62 +694,53 @@ class func_tokyo_public_trans_API():
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Train_information_Station.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:StationTimetable"  #駅時刻表
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Train_information_StationTimetable.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:TrainTimetable"  #列車時刻表
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Train_information_TrainTimetable.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:TrainType"  #列車種別
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Train_information_TrainType.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:RailDirection"  #列車進行方向
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Train_information_RailDirection.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:Railway"  #列車進行方向
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Train_information_Railway.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:Railway"  #路線情報
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Train_information_Railway.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:RailwayFare"  #運賃情報
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Train_information_RailwayFare.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:PassengerSurvey"  #運賃情報
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Train_information_PassengerSurvey.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         return
 
@@ -779,36 +753,30 @@ class func_tokyo_public_trans_API():
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Bus_information_BusTimetable.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
-
 
         RDF_TYPE = "odpt:BusroutePattern"  #バス運行路線情報
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Bus_information_BusroutePattern.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:BusroutePatternFare"  #バス運賃情報
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Bus_information_BusroutePatternFare.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:BusstopPole"  #バス停標柱情報
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Bus_information_BusstopPole.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         RDF_TYPE = "odpt:BusstopPoleTimetable"  #バス停標柱時刻表
         URL_REQ = self.URL_common + RDF_TYPE + DUMP_REQ
         response = requests.get(URL_REQ, params=params)
         df_s = pd.read_json(response.text, encoding="shift-jis")
         df_s.to_csv("dump_Bus_information_BusstopPoleTimetable.csv",encoding='utf_8_sig') #for debug
-        print(response.status_code,RDF_TYPE)
 
         return
 
@@ -851,14 +819,10 @@ class func_tokyo_public_trans_API():
         #odpt:railway
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text)
         if self.DEB_FLAG == True:
             df_s_deb = pd.read_json(response.text, encoding="shift-jis")
             df_s_deb.to_csv("search_GPS_near_train_station_info.csv",encoding='utf_8_sig') #for debug
-
-        print(df_s['odpt:operator'])
-
         return df_s
 
     #GPS座標で近隣に存在するバス停の取得
@@ -884,7 +848,6 @@ class func_tokyo_public_trans_API():
         #odpt:railway
 
         response = requests.get(URL_REQ, params=params)
-        print(response.status_code)
         df_s = pd.read_json(response.text, encoding="shift-jis")
 
         opelist = list(df_s['odpt:operator'])
