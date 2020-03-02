@@ -1,6 +1,6 @@
-# 技術書典8 Django/Leaﬂet/Herokuで作るWeb地図アプリ開発超入門サポートページ
+# 技術書典 応援祭 Django/Leaﬂet/Herokuで作るWeb地図アプリ開発超入門サポートページ
 
-本サイトでは技術書典8で販売した『Django/Leaﬂet/Herokuで作るWeb地図アプリ開発超入門』のサンプルスクリプト
+本サイトでは技術書典 応援祭で販売した『Django/Leaﬂet/Herokuで作るWeb地図アプリ開発超入門』のサンプルスクリプト
 を公開しています。
 
 # 動作環境
